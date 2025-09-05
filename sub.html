@@ -15,57 +15,63 @@
       height: 100vh;
       overflow-y: auto;
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      flex-direction: column;
+      align-items: center;
       background: #fff;
     }
     canvas {
-      width: 100%;
+      margin: 10px 0;
+      width: 95%;
       height: auto;
     }
   </style>
 </head>
 <body>
-  <div id="pdf-container">
-    <canvas id="pdf-canvas"></canvas>
-  </div>
+  <div id="pdf-container"></div>
 
-  <!-- PDF.js versión 2.x -->
+  <!-- PDF.js versión estable 2.x -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
     const path = window.location.pathname.replace("/", "");
-    const pdfUrl = `/pdfs/${path}.pdf`;
-    const canvas = document.getElementById('pdf-canvas');
-    const ctx = canvas.getContext('2d');
+    const pdfUrl = `/pdfs/${path}.pdf`; // ruta local en tu servidor
     const container = document.getElementById('pdf-container');
-
-    // Detectar móvil
-    const esMovil = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     if (!path) {
       document.body.innerHTML = "";
-    } else if (esMovil) {
-      window.location.href = pdfUrl; // abrir en visor nativo
     } else {
-      // Renderizar PDF en PC
-      pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-        pdf.getPage(1).then(page => {
-          // Escala dinámica según ancho del contenedor
-          const viewport = page.getViewport({ scale: 1 });
-          const scale = container.clientWidth / viewport.width;
-          const scaledViewport = page.getViewport({ scale });
+      // Cargar PDF como ArrayBuffer para que nunca se descargue
+      fetch(pdfUrl)
+        .then(response => response.arrayBuffer())
+        .then(data => pdfjsLib.getDocument({ data }).promise)
+        .then(pdf => {
+          // Renderizar todas las páginas
+          const renderPage = (num) => {
+            pdf.getPage(num).then(page => {
+              const viewport = page.getViewport({ scale: 1 });
+              const scale = container.clientWidth / viewport.width;
+              const scaledViewport = page.getViewport({ scale });
 
-          canvas.width = scaledViewport.width;
-          canvas.height = scaledViewport.height;
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              canvas.width = scaledViewport.width;
+              canvas.height = scaledViewport.height;
 
-          page.render({ canvasContext: ctx, viewport: scaledViewport });
+              container.appendChild(canvas);
+
+              page.render({ canvasContext: ctx, viewport: scaledViewport }).promise.then(() => {
+                if (num < pdf.numPages) renderPage(num + 1);
+              });
+            });
+          };
+          renderPage(1);
+        })
+        .catch(err => {
+          container.innerHTML = "<h2>PDF no encontrado o error al cargar</h2>";
+          console.error(err);
         });
-      }).catch(err => {
-        document.body.innerHTML = "<h2>PDF no encontrado</h2>";
-      });
     }
   </script>
 </body>
