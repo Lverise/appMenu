@@ -21,18 +21,26 @@
   <iframe id="visor"></iframe>
 
   <script>
-    // Obtiene la ruta actual (ej: /menu1)
     const path = window.location.pathname.replace("/", "");
+    const pdfUrl = `/pdfs/${path}.pdf`;
 
-    // Lista de menús disponibles
-    const menusDisponibles = ["menu1", "menu2", "menu3", "menu4"];
+    // Detección básica de móvil
+    const esMovil = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    // Si la ruta coincide con un menú, lo carga
-    if (menusDisponibles.includes(path)) {
-      document.getElementById("visor").src = `/pdfs/${path}.pdf`;
+    if (path) {
+      if (esMovil) {
+        // En móviles, abrir directamente el PDF
+        window.location.href = pdfUrl;
+      } else {
+        // En PC, mostrarlo embebido
+        document.getElementById("visor").src = pdfUrl;
+      }
     } else {
       document.body.innerHTML = "";
     }
+
+
+    
   </script>
 </body>
 </html>
