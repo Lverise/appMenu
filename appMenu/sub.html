@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Menú</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <iframe id="visor"></iframe>
+
+  <script>
+    // Obtiene la ruta actual (ej: /menu1)
+    const path = window.location.pathname.replace("/", "");
+
+    // Lista de menús disponibles
+    const menusDisponibles = ["menu1", "menu2", "menu3", "menu4"];
+
+    // Si la ruta coincide con un menú, lo carga
+    if (menusDisponibles.includes(path)) {
+      document.getElementById("visor").src = `/pdfs/${path}.pdf`;
+    } else {
+      document.body.innerHTML = "";
+    }
+  </script>
+</body>
+</html>
