@@ -27,6 +27,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.239/pdf.min.js"></script>
 
   <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.239/pdf.worker.min.js';
+
     const path = window.location.pathname.replace("/", "");
     const pdfUrl = `/pdfs/${path}.pdf`;
     const canvas = document.getElementById('pdf-canvas');
